@@ -30,13 +30,15 @@ def main():
 
     # create a recorder to dump output frame
     record = cv2.VideoWriter(outputFile, cv2.VideoWriter_fourcc(*'MJPG'), fps, (width, height))
-    FrameCount = 0
+
+    frameCount = 0
+    frameLen = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     while(cap.isOpened()):
         ret, frame = cap.read()
-        frameLen = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        FrameCount += 1
-        print ("Processing :", int((FrameCount/frameLen) * 100), "%", end = '\r')
+        frameCount += 1
+
+        print ("Processing :", int((frameCount/frameLen) * 100), "%", end = '\r')
         if ret == True:
             yuv = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV)
             y, u, v = cv2.split(yuv)
@@ -54,7 +56,7 @@ def main():
         else:
             break
 
-    print ("Processed :", int((FrameCount/frameLen) * 100), "%")
+    print ("Processed : ", int((frameCount/frameLen) * 100), "%")
     cap.release()
     record.release()
     cv2.destroyAllWindows()
