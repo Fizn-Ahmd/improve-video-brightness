@@ -13,14 +13,20 @@ def main():
 
     # use default outputFile if not provided through cammand argument
     if outputFile == None:
-        outputFile = "output-"  + videoFile
+        outputFile = "output.mp4"
         print ("--outputFile not provided using default ", outputFile)
 
     cap = cv2.VideoCapture(videoFile)
     if cap.isOpened() == False:
         print ("videoFile", videoFile, "is not in the given path")
         sys.exit(1)
+
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    record = cv2.VideoWriter(outputFile, cv2.VideoWriter_fourcc(*'MJPG'), fps, (width, height))
     FrameCount = 0
+
     while(cap.isOpened()):
         ret, frame = cap.read()
         frameLen = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -37,13 +43,16 @@ def main():
                         y[index] = 255
                     else:
                         y[index] = y[index] + int(targetValue - y.mean())
+
             # print ("after: ", y.mean())
             final_yuv = cv2.merge((y, u, v))
             bright = cv2.cvtColor(final_yuv, cv2.COLOR_YUV2BGR)
+            record.write(bright)
         else:
             break
 
     cap.release()
+    record.release()
     cv2.destroyAllWindows()
 
 def getInput():
