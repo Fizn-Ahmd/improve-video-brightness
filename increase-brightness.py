@@ -1,12 +1,13 @@
 import cv2
-# import numpy
 import sys
 
 DIFF_FROM_TARGET_VALUE = 5
 
 def main():
+    # get the cmd line arguments
     videoFile, outputFile, targetValue = getInput()
 
+    # if videofile not provided exit the program
     if videoFile == None:
         print ("--videofile not provided")
         sys.exit(1)
@@ -17,6 +18,8 @@ def main():
         print ("--outputFile not provided using default ", outputFile)
 
     cap = cv2.VideoCapture(videoFile)
+
+    # if videofile not found exit
     if cap.isOpened() == False:
         print ("videoFile", videoFile, "is not in the given path")
         sys.exit(1)
@@ -24,6 +27,8 @@ def main():
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS)
+
+    # create a recorder to dump output frame
     record = cv2.VideoWriter(outputFile, cv2.VideoWriter_fourcc(*'MJPG'), fps, (width, height))
     FrameCount = 0
 
@@ -35,7 +40,6 @@ def main():
         if ret == True:
             yuv = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV)
             y, u, v = cv2.split(yuv)
-            # print ("before: ", y.mean())
 
             while y.mean() < targetValue - DIFF_FROM_TARGET_VALUE:
                 for index in range(len(y)):
@@ -44,13 +48,13 @@ def main():
                     else:
                         y[index] = y[index] + int(targetValue - y.mean())
 
-            # print ("after: ", y.mean())
             final_yuv = cv2.merge((y, u, v))
             bright = cv2.cvtColor(final_yuv, cv2.COLOR_YUV2BGR)
             record.write(bright)
         else:
             break
 
+    print ("Processed :", int((FrameCount/frameLen) * 100), "%")
     cap.release()
     record.release()
     cv2.destroyAllWindows()
